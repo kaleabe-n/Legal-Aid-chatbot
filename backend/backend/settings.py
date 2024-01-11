@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-h*i!hfbtbr4fsqy10)i=)mj=fg)ab9fdl-$uh(_nqjx4j5+*j9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "0.0.0.0"]
+ALLOWED_HOSTS = ["localhost", "0.0.0.0","127.0.0.1"]
 
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -55,8 +55,20 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "rest_framework",
     "corsheaders",
-    "user.apps.UserConfig"
+    "user.apps.UserConfig",
+    'social_django',
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+LOGIN_REDIRECT_URL = 'http://localhost:8000/social-auth/complete/google-oauth2/'
+LOGOUT_REDIRECT_URL = '/'
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = 'https://1016843571099-itf7rbkri478a7kbb9shfb2h09uh1hdd.apps.googleusercontent.com'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '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'
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
