@@ -55,7 +55,8 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "rest_framework",
     "corsheaders",
-    "user.apps.UserConfig"
+    "user.apps.UserConfig",
+    "feedback.apps.FeedbackConfig",
 ]
 
 MIDDLEWARE = [
