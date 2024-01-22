@@ -44,9 +44,9 @@ def feedback_api(request: Request):
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@api_view(["PUT", "DELETE"])
+@api_view(["PUT", "DELETE", "GET"])
 @permission_classes([IsAuthenticated])
-def modify_feedback_api(request: Request, pk: str):
+def single_feedback_api(request: Request, pk: str):
     user: User = request.user
     if request.method == "PUT":
         content: str = request.data.get("content", None)
@@ -91,6 +91,26 @@ def modify_feedback_api(request: Request, pk: str):
         try:
             feedback.delete()
             return Response(status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    elif request.method == "GET":
+        try:
+            feedback: Feedback = Feedback.objects.get(id=pk)
+            feedback_giver: User = feedback.posted_by
+        except Exception as e:
+            print(e)
+            return Response(
+                "feedback with this id not found", status=status.HTTP_404_NOT_FOUND
+            )
+        if not user.is_superuser and feedback_giver != user:
+            return Response(
+                "you are not allowed to access this feedback",
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        try:
+            feedback_serilizer: FeedbackSerilizer = FeedbackSerilizer(feedback)
+            return Response(feedback_serilizer.data)
         except Exception as e:
             print(e)
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
