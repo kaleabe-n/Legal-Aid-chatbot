@@ -134,3 +134,29 @@ def get_curr_user(request: Request):
     user = request.user
     serilizer: UserSerilizer = UserSerilizer(user)
     return Response(serilizer.data, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+@permission_classes([IsAdminUser])
+def get_all_users(request: Request)->Response:
+    try:
+        users:[User] = User.objects.all()
+        user_serilizer:UserSerilizer = UserSerilizer(users,many=True)
+        return Response(user_serilizer.data)
+    except:
+        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+@api_view(["GET"])
+@permission_classes([IsAdminUser])
+def get_single_user(request:Request,email)->Response:
+    try:
+        user:User = User.objects.get(username=email)
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    try:
+        user_serilizer:UserSerilizer = UserSerilizer(user)
+        return Response(user_serilizer.data)
+    except Exception as e:
+        print(e)
+        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
