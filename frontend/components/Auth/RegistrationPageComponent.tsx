@@ -9,20 +9,15 @@ const RegistrationPageComponent: React.FC = () => {
         <div className="w-7/12 bg-primary flex flex-col justify-center items-center rounded-l-xl">
           {/* Logo section */}
           <img src="./images/registration/Mask group.svg" alt="" className="" />
-
-          {/* Title Section */}
           <h1 className="font-bold text-lg text-white">Legal Aid</h1>
-
-          {/* Description section */}
           <p className="text-white mt-4">
             Ask about legal system with just clicks
           </p>
         </div>
-        <div className="w-5/12 bg-white rounded-r-xl flex flex-col py-20 px-8">
-          {/* Welcome section */}
-          <h1 className="w-full text-center text-xl font-semibold">Welcome</h1>
 
-          {/* form section */}
+        {/* registration form section */}
+        <div className="w-5/12 bg-white rounded-r-xl flex flex-col py-20 px-8">
+          <h1 className="w-full text-center text-xl font-semibold">Welcome</h1>
           <div className="flex flex-col space-y-4 px-8 mt-8">
             <input
               className="border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-primary"
@@ -40,7 +35,6 @@ const RegistrationPageComponent: React.FC = () => {
               placeholder="Confirm Password"
             />
           </div>
-
           <button className="mt-8 mx-8 bg-primary text-white rounded-md py-3 px-4 outline outline-2 outline-primary hover:bg-white hover:text-primary hover:shadow-inner transition ease-in duration-200 focus:outline-none focus:ring-2 focus:ring-primary">
             SignUp
           </button>
@@ -58,8 +52,13 @@ const RegistrationPageComponent: React.FC = () => {
             <p>Sign in With Google</p>
           </button>
           <div className="mt-4 px-8 flex justify-between">
-            <p className="text-sm text-slate-500">Do you Have an account?</p>
-            <Link href="#" className="text-primary text-sm hover:underline">
+            <p className="text-sm text-slate-500 font-semibold">
+              Do you Have an account?
+            </p>
+            <Link
+              href="#"
+              className="font-extrabold text-primary text-sm hover:underline"
+            >
               Sign in
             </Link>
           </div>
