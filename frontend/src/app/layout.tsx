@@ -19,10 +19,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
       <body className={`flex flex-col ${poppins.className}`}>
         <Providers>{children}</Providers>
-      </body>
       </body>
     </html>
   );
