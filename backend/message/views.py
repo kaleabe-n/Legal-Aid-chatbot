@@ -16,9 +16,23 @@ def message_api(request:Request)->Response:
     if request.method == "GET":
         user:User = request.user
         try:
-            messages:[Message] = Message.objects.filter(user=user)
-            user_serilizer:MessageSerilizer = MessageSerilizer(messages,many=True)
-            return Response(user_serilizer.data)
+            params = request.query_params
+            all_messages:[Message] = Message.objects.filter(user=user)
+            per_page = int(params.get("per_page", 100000000))
+            page = int(params.get("page", 0))
+            start = page * per_page
+            end = start + per_page
+            messages = all_messages[start:end]
+            message_serilizer: MessageSerilizer = MessageSerilizer(
+                messages, many=True
+            )
+            return Response(
+                {
+                    "data": message_serilizer.data,
+                    "total": all_messages.count(),
+                    "curr_page": page,
+                }
+            )
         except Exception as e:
             print(e)
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -83,9 +97,23 @@ def get_message_by_user(request:Request,email:str)->Response:
         print(e)
         return Response(status=status.HTTP_404_NOT_FOUND)
     try:
-        messages:[Message] = Message.objects.filter(user=user)
-        message_serilizer:MessageSerilizer = MessageSerilizer(messages,many=True)
-        return Response(message_serilizer.data)
+        params = request.query_params
+        all_messages:[Message] = Message.objects.filter(user=user)
+        per_page = int(params.get("per_page", 100000000))
+        page = int(params.get("page", 0))
+        start = page * per_page
+        end = start + per_page
+        messages = all_messages[start:end]
+        message_serilizer: MessageSerilizer = MessageSerilizer(
+            messages, many=True
+        )
+        return Response(
+            {
+                "data": message_serilizer.data,
+                "total": all_messages.count(),
+                "curr_page": page,
+            }
+        )
     except Exception as e:
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
