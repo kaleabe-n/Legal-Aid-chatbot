@@ -1,14 +1,21 @@
-/* eslint-disable @next/next/no-img-element */
+import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
-const RegistrationPageComponent: React.FC = () => {
+const RegistrationComponent: React.FC = () => {
   return (
     <div className="bg-secondary min-h-screen flex items-center justify-center">
       <div className="w-9/12 flex shadow-md">
         <div className="w-7/12 bg-primary flex flex-col justify-center items-center rounded-l-xl">
           {/* Logo section */}
-          <img src="./images/registration/Mask group.svg" alt="" className="" />
+          <Image
+            src="legal-aid-logo.svg"
+            alt=""
+            className=""
+            width={1}
+            height={1}
+            style={{ width: "100%" }}
+          />
           <h1 className="font-bold text-lg text-white">Legal Aid</h1>
           <p className="text-white mt-4">
             Ask about legal system with just clicks
@@ -56,7 +63,7 @@ const RegistrationPageComponent: React.FC = () => {
               Do you Have an account?
             </p>
             <Link
-              href="#"
+              href="/login"
               className="font-extrabold text-primary text-sm hover:underline"
             >
               Sign in
@@ -68,4 +75,4 @@ const RegistrationPageComponent: React.FC = () => {
   );
 };
 
-export default RegistrationPageComponent;
+export default RegistrationComponent;
