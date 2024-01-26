@@ -1,16 +1,22 @@
-/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import React from "react";
 import { FiPhone } from "react-icons/fi";
 import { CiLock } from "react-icons/ci";
+import Image from "next/image";
 
-const Page: React.FC = () => {
+const LoginPage: React.FC = () => {
   return (
     <div className="bg-secondary min-h-screen flex items-center justify-center">
       <div className="w-9/12 flex shadow-md">
         <div className="w-7/12 bg-primary flex flex-col justify-center items-center space-y-4 rounded-l-xl">
           {/* Logo section */}
-          <img src="./images/login/Mask group.svg" alt="" className="" />
+          <Image
+            src="legal-aid-logo.svg"
+            alt=""
+            width={1}
+            height={1}
+            className="w-[100%]"
+          />
 
           {/* Title Section */}
           <h1 className="font-bold text-lg text-white">Legal Aid</h1>
@@ -35,7 +41,7 @@ const Page: React.FC = () => {
               />
             </div>
             <div className="border border-gray-300 rounded-md py-2 px-4 has-[:focus]:outline-none has-[:focus]:ring-2 has-[:focus]:ring-primary flex items-center space-x-3">
-            <CiLock color="#000000" size={18} />
+              <CiLock color="#000000" size={18} />
               <input
                 type="password"
                 placeholder="Password"
@@ -70,7 +76,10 @@ const Page: React.FC = () => {
             <p className="text-sm text-slate-500">
               Don&apos;t Have an account?
             </p>
-            <Link href="#" className="text-primary text-sm hover:underline">
+            <Link
+              href="signup"
+              className="text-primary text-sm hover:underline"
+            >
               Sign up
             </Link>
           </div>
@@ -80,4 +89,4 @@ const Page: React.FC = () => {
   );
 };
 
-export default Page;
+export default LoginPage;
