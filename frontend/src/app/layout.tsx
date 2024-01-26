@@ -1,6 +1,9 @@
 import { Providers } from "@/store/provider";
 import "./globals.css";
 import { Poppins } from "next/font/google";
+import { ToastContainer, toast } from "react-toastify";
+
+import 'react-toastify/dist/ReactToastify.css';
 
 export const metadata = {
   title: "Amharic Legal Aid Chatbot",
@@ -20,7 +23,21 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`flex flex-col ${poppins.className}`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="colored"
+          />
+        </Providers>
       </body>
     </html>
   );

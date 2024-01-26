@@ -1,22 +1,64 @@
+"use client";
+
+/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import { FiPhone } from "react-icons/fi";
 import { CiLock } from "react-icons/ci";
-import Image from "next/image";
+import { LoginFormProps } from "../../../types/LoginForm";
+import { RiMailLine } from "react-icons/ri";
+import { useForm } from "react-hook-form";
+import { useLoginMutation } from "@/store/login/loginApi";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
-const LoginPage: React.FC = () => {
+const Page: React.FC = () => {
+  const router = useRouter();
+  const [login, { data, isError, isLoading, isSuccess, error, status }] =
+    useLoginMutation();
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const {
+    register,
+    handleSubmit,
+    trigger,
+    formState: { errors, isValid },
+  } = useForm<LoginFormProps>();
+
+  const onSubmit = async (data: any) => {
+    setLoading(true);
+    console.log(data);
+    const response: any = await login(data);
+    console.log(response, isError, isSuccess, error, status);
+
+    if (response?.data?.access) {
+      localStorage.setItem("access", response.data.access);
+      localStorage.setItem("refersh", response.data.refersh);
+      toast.success("Logged in successfully");
+      router.push("/");
+      // console.log(response.data.access)
+    } else {
+      toast.error(
+        "Unable to login, please check your email and password and try again"
+      );
+    }
+
+    setLoading(false);
+  };
+
+  if (loading)
+    return (
+      <div className="flex items-center justify-center min-h-screen text-3xl">
+        Loading...
+      </div>
+    );
+
   return (
-    <div className="bg-secondary min-h-screen flex items-center justify-center">
-      <div className="w-9/12 flex shadow-md">
-        <div className="w-7/12 bg-primary flex flex-col justify-center items-center space-y-4 rounded-l-xl">
+    <div className="md:bg-secondary md:min-h-screen flex items-center justify-center">
+      <div className="w-10/12 md:w-11/12 lg:w-9/12 flex md:shadow-md">
+        <div className="hidden md:flex w-7/12 bg-primary flex-col justify-center items-center space-y-4 rounded-l-xl">
           {/* Logo section */}
-          <Image
-            src="legal-aid-logo.svg"
-            alt=""
-            width={1}
-            height={1}
-            className="w-[100%]"
-          />
+          <img src="./images/login/Mask group.svg" alt="logo" className="" />
 
           {/* Title Section */}
           <h1 className="font-bold text-lg text-white">Legal Aid</h1>
@@ -26,45 +68,89 @@ const LoginPage: React.FC = () => {
             Ask about legal system with just clicks
           </p>
         </div>
-        <div className="w-5/12 bg-white rounded-r-xl flex flex-col py-20 px-8">
+        <div className="w-full md:w-5/12 bg-white rounded-r-xl flex flex-col py-20 md:px-8">
           {/* Welcome section */}
           <h1 className="w-full text-center text-xl font-semibold">Welcome</h1>
 
           {/* form section */}
-          <div className="flex flex-col space-y-4 px-8 mt-8">
-            <div className="border border-gray-300 rounded-md py-2 px-4 has-[:focus]:outline-none has-[:focus]:ring-2 has-[:focus]:ring-primary flex items-center space-x-3">
-              <FiPhone color="#505050" />
-              <input
-                type="text"
-                placeholder="Phone Number"
-                className="flex-auto h-full focus:outline-none"
-              />
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col space-y-4 mt-8 md:px-8"
+          >
+            <div>
+              <div className="border border-gray-300 rounded-md py-2 px-4 has-[:focus]:outline-none has-[:focus]:ring-2 has-[:focus]:ring-primary flex items-center space-x-3">
+                <RiMailLine color="#505050" size={16} />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  className="flex-auto h-full focus:outline-none"
+                  {...register("username", {
+                    required: "Email is Required!!!",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address",
+                    },
+                  })}
+                  onKeyUp={() => {
+                    trigger("username");
+                  }}
+                />
+              </div>
+              {errors.username && (
+                <small className="text-red-500 text-xs">
+                  {errors.username.message}
+                </small>
+              )}
             </div>
-            <div className="border border-gray-300 rounded-md py-2 px-4 has-[:focus]:outline-none has-[:focus]:ring-2 has-[:focus]:ring-primary flex items-center space-x-3">
-              <CiLock color="#000000" size={18} />
-              <input
-                type="password"
-                placeholder="Password"
-                className="flex-auto h-full focus:outline-none"
-              />
+            <div>
+              <div className="border border-gray-300 rounded-md py-2 px-4 has-[:focus]:outline-none has-[:focus]:ring-2 has-[:focus]:ring-primary flex items-center space-x-3">
+                <CiLock color="#000000" size={18} />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  className="flex-auto h-full focus:outline-none"
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: {
+                      value: 8,
+                      message: "Password must be at least 8 characters",
+                    },
+                  })}
+                  onKeyUp={() => {
+                    trigger("password");
+                  }}
+                />
+              </div>
+              {errors.password && (
+                <small className="text-red-500 text-xs">
+                  {errors.password.message}
+                </small>
+              )}
             </div>
-          </div>
+            {/* Reset Password link */}
+            <div className="text-end md:text-center mt-4">
+              <Link href="#" className="text-primary text-sm hover:underline">
+                Reset Password?
+              </Link>
+            </div>
+            <button
+              disabled={!isValid}
+              className="mt-8 bg-primary text-white rounded-md py-3 px-4 outline outline-2 outline-primary hover:bg-white hover:text-primary hover:shadow-inner transition ease-in duration-200 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-secondary disabled:text-white"
+            >
+              Login
+            </button>
+          </form>
 
-          {/* Reset Password link */}
-          <div className="text-center mt-4">
-            <Link href="#" className="text-primary text-sm hover:underline">
-              Reset Password?
-            </Link>
-          </div>
-          <button className="mt-8 mx-8 bg-primary text-white rounded-md py-3 px-4 outline outline-2 outline-primary hover:bg-white hover:text-primary hover:shadow-inner transition ease-in duration-200 focus:outline-none focus:ring-2 focus:ring-primary">
-            Login
-          </button>
-          <div className="flex items-center mt-4 px-5">
+          <div className="flex items-center mt-4 md:px-5">
             <hr className="w-full border-gray-800" />
             <p className="mx-4">OR</p>
             <hr className="w-full border-gray-800" />
           </div>
-          <button className="mt-4 mx-8 rounded-md py-1 px-4 outline outline-1 outline-slate-500 text-sm bg-white hover:shadow-inner focus:outline-none focus:ring-2 focus:ring-primary flex space-x-2 items-center justify-center">
+          <button
+            type="button"
+            disabled={!isValid}
+            className="mt-4 md:mx-8 rounded-md py-1 px-4 outline outline-1 outline-slate-500 text-sm bg-white hover:shadow-inner focus:outline-none focus:ring-2 focus:ring-primary flex space-x-2 items-center justify-center"
+          >
             <img
               src="./images/login/googleIcon.svg"
               alt="google"
@@ -72,14 +158,11 @@ const LoginPage: React.FC = () => {
             />
             <p>Sign in With Google</p>
           </button>
-          <div className="mt-4 px-8 flex justify-between">
+          <div className="mt-4 md:px-8 flex justify-between">
             <p className="text-sm text-slate-500">
               Don&apos;t Have an account?
             </p>
-            <Link
-              href="signup"
-              className="text-primary text-sm hover:underline"
-            >
+            <Link href="#" className="text-primary text-sm hover:underline">
               Sign up
             </Link>
           </div>
@@ -89,4 +172,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
+export default Page;
