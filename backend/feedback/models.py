@@ -13,4 +13,4 @@ class Feedback(models.Model):
         ordering = ["-time"]
 
     def __str__(self) -> str:
-        return self.content
+        return self.content[:20]
