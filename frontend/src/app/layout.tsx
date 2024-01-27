@@ -5,6 +5,9 @@ import { Poppins } from "next/font/google";
 export const metadata = {
   title: "Amharic Legal Aid Chatbot",
   description: "Amharic Legal Aid Chatbot",
+  icons: {
+    icon: "favico.ico",
+  },
 };
 
 const poppins = Poppins({
