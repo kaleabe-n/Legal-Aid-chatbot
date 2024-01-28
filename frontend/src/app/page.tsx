@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { Dialog } from "@headlessui/react";
 import {
   Bars3Icon,
@@ -14,6 +14,8 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { FiLogOut } from "react-icons/fi";
+import { useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 
 const messages = [];
 
@@ -36,7 +38,15 @@ const infos = [
 ];
 
 export default function Home() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const [inputValue, setInputValue] = useState<string>("");
@@ -65,6 +75,14 @@ export default function Home() {
       textareaRef.current.style.height = height;
     }
   };
+
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-3xl">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -98,9 +116,9 @@ export default function Home() {
                 </div>
               </div>
             </Link>
-            <Link
-              href="#"
-              className="lg:block lg:text-sm lg:font-semibold lg:leading-6 lg:text-gray-900"
+            <div
+              onClick={() => signOut()}
+              className="cursor-pointer lg:block lg:text-sm lg:font-semibold lg:leading-6 lg:text-gray-900"
             >
               <div className="flex">
                 <p>Logout</p>
@@ -108,7 +126,7 @@ export default function Home() {
                   <FiLogOut className="h-6 w-6" />
                 </div>
               </div>
-            </Link>
+            </div>
           </div>
           <div className="flex lg:hidden">
             <button
@@ -166,9 +184,9 @@ export default function Home() {
                   </Link>
                 </div>
                 <div className="py-6">
-                  <Link
-                    href="#"
-                    className="lg:block lg:text-sm lg:font-semibold lg:leading-6 lg:text-gray-900"
+                  <div
+                    onClick={() => signOut()}
+                    className="cursor-pointer lg:block lg:text-sm lg:font-semibold lg:leading-6 lg:text-gray-900"
                   >
                     <div className="flex">
                       <p>Logout</p>
@@ -176,7 +194,7 @@ export default function Home() {
                         <FiLogOut className="h-6 w-6" />
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 </div>
               </div>
             </div>
