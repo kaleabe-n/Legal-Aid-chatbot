@@ -1,15 +1,9 @@
 "use client";
 
-import { ChangeEvent, Fragment, useRef, useState } from "react";
-import { Dialog, Transition } from "@headlessui/react";
+import { ChangeEvent, useRef, useState } from "react";
+import { Dialog } from "@headlessui/react";
 import {
   Bars3Icon,
-  CalendarIcon,
-  ChartPieIcon,
-  DocumentDuplicateIcon,
-  FolderIcon,
-  HomeIcon,
-  UsersIcon,
   XMarkIcon,
   StarIcon,
   SparklesIcon,
@@ -19,22 +13,9 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import Image from "next/image";
-import ChatInput from "../../components/ChatInput";
 import { FiLogOut } from "react-icons/fi";
 
-const navigation = [
-  { name: "Dashboard", href: "#", icon: HomeIcon, current: true },
-  { name: "Team", href: "#", icon: UsersIcon, current: false },
-  { name: "Projects", href: "#", icon: FolderIcon, current: false },
-  { name: "Calendar", href: "#", icon: CalendarIcon, current: false },
-  { name: "Documents", href: "#", icon: DocumentDuplicateIcon, current: false },
-  { name: "Reports", href: "#", icon: ChartPieIcon, current: false },
-];
-const teams = [
-  { id: 1, name: "Heroicons", href: "#", initial: "H", current: false },
-  { id: 2, name: "Tailwind Labs", href: "#", initial: "T", current: false },
-  { id: 3, name: "Workcation", href: "#", initial: "W", current: false },
-];
+const messages = [];
 
 const infos = [
   {
@@ -54,10 +35,6 @@ const infos = [
   },
 ];
 
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
-}
-
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -76,20 +53,21 @@ export default function Home() {
       const computed = window.getComputedStyle(textareaRef.current);
 
       // Calculate the height
-      const height = `${
+      const height = `${Math.min(
         textareaRef.current.scrollHeight +
-        parseInt(computed.getPropertyValue("border-top-width"), 10) +
-        parseInt(computed.getPropertyValue("padding-top"), 10) +
-        parseInt(computed.getPropertyValue("padding-bottom"), 10) +
-        parseInt(computed.getPropertyValue("border-bottom-width"), 10)
-      }px`;
+          parseInt(computed.getPropertyValue("border-top-width"), 10) +
+          parseInt(computed.getPropertyValue("padding-top"), 10) +
+          parseInt(computed.getPropertyValue("padding-bottom"), 10) +
+          parseInt(computed.getPropertyValue("border-bottom-width"), 10),
+        250
+      )}px`;
 
       textareaRef.current.style.height = height;
     }
   };
 
   return (
-    <div>
+    <div className="flex flex-col min-h-screen">
       <header className="border-bottom-[#D1D5DB] border-b border-gray-300">
         <nav
           className="mx-auto flex max-w-7xl items-center justify-between gap-x-6 px-6 lg:px-8 border-[#D1D5DB] bottom-2"
@@ -206,43 +184,76 @@ export default function Home() {
         </Dialog>
       </header>
       <div
-        className="mx-auto flex flex-col lg:px-8 py-3"
+        className="mx-auto flex flex-col lg:px-8 py-3 flex-1 overflow-hidden flex-grow w-full"
         style={{ height: "calc(100vh - 73px)" }}
       >
-        <div className="mx-auto">
-          <Image
-            src="legal-aid-logo-black.svg"
-            alt=""
-            width={300}
-            height={300}
-          />
-        </div>
-        <div
-          className="flex justify-center gap-1 flex-wrap"
-          style={{ flexGrow: 1 }}
-        >
-          {infos.map((info, idx) => (
-            <div key={idx}>
-              <div className={`min-w-[250px] m-3`}>
-                <a
-                  href="#"
-                  className={`block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700`}
-                >
-                  <div className="bg-[#F8F8F8] rounded-full w-[90px] h-[90px] flex items-center justify-center mb-2">
-                    <info.icon className="h-9 w-9 text-[#919191]" />
+        {!messages.length && (
+          <div className="mx-auto">
+            <Image
+              src="legal-aid-logo-black.svg"
+              alt=""
+              width={300}
+              height={300}
+            />
+          </div>
+        )}
+        {!messages.length && (
+          <div
+            className="flex justify-center gap-1 flex-wrap"
+            style={{ flexGrow: 1 }}
+          >
+            {infos.map((info, idx) => (
+              <div key={idx}>
+                <div className={`min-w-[250px] m-3`}>
+                  <a
+                    href="#"
+                    className={`block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700`}
+                  >
+                    <div className="bg-[#F8F8F8] rounded-full w-[90px] h-[90px] flex items-center justify-center mb-2">
+                      <info.icon className="h-9 w-9 text-[#919191]" />
+                    </div>
+                    <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                      {info.title}
+                    </h5>
+                    <p className="font-normal text-gray-700 dark:text-gray-400 underline">
+                      {info.description}
+                    </p>
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="flex flex-col flex-1 overflow-y-auto flex-grow w-full">
+          {messages.length !== 0 && (
+            <div className="w-full px-5 flex flex-col justify-between">
+              <div className="flex flex-col mt-5">
+                <div className="flex justify-end mb-4">
+                  <div className="mr-2 py-3 px-4 bg-blue-200 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl text-blue-900">
+                    Welcome to group everyone !
                   </div>
-                  <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                    {info.title}
-                  </h5>
-                  <p className="font-normal text-gray-700 dark:text-gray-400 underline">
-                    {info.description}
-                  </p>
-                </a>
+                  <img
+                    src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
+                    className="object-cover h-8 w-8 rounded-full"
+                    alt=""
+                  />
+                </div>
+                <div className="flex justify-start mb-4">
+                  <Image
+                    src="legal-aid-logo-black.svg"
+                    alt=""
+                    width={70}
+                    height={70}
+                  />
+                  <div className="ml-2 py-3 px-4 bg-gray-100 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-gray-700">
+                    happy holiday guys!
+                  </div>
+                </div>
               </div>
             </div>
-          ))}
+          )}
         </div>
-        <div className="flex items-start rounded-lg border border-gray-300 bg-white px-4 py-2 shadow-sm">
+        <div className="mx-2 flex items-start rounded-lg border border-gray-300 bg-white px-4 py-2 shadow-sm">
           <textarea
             ref={textareaRef}
             className="w-full outline-none focus:outline-none resize-none rounded-lg bg-transparent"
