@@ -1,9 +1,6 @@
 "use client";
-
-/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
-import React, { useState } from "react";
-import { FiPhone } from "react-icons/fi";
+import React, { useEffect, useState } from "react";
 import { CiLock } from "react-icons/ci";
 import { LoginFormProps } from "../../../types/LoginForm";
 import { RiMailLine } from "react-icons/ri";
@@ -11,9 +8,18 @@ import { useForm } from "react-hook-form";
 import { useLoginMutation } from "@/store/login/loginApi";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { signIn, useSession } from "next-auth/react";
 
 const Page: React.FC = () => {
+  const { data: session, status: sessionStatus } = useSession();
   const router = useRouter();
+
+  useEffect(() => {
+    if (sessionStatus === "authenticated") {
+      router.push("/");
+    }
+  }, [sessionStatus, router]);
+
   const [login, { data, isError, isLoading, isSuccess, error, status }] =
     useLoginMutation();
 
@@ -32,11 +38,8 @@ const Page: React.FC = () => {
     console.log(response, isError, isSuccess, error, status);
 
     if (response?.data?.access) {
-      localStorage.setItem("access", response.data.access);
-      localStorage.setItem("refersh", response.data.refersh);
+      signIn("credentials", data);
       toast.success("Logged in successfully");
-      router.push("/");
-      // console.log(response.data.access)
     } else {
       toast.error(
         "Unable to login, please check your email and password and try again"
@@ -148,7 +151,7 @@ const Page: React.FC = () => {
           </div>
           <button
             type="button"
-            disabled={!isValid}
+            onClick={() => signIn("google")}
             className="mt-4 md:mx-8 rounded-md py-1 px-4 outline outline-1 outline-slate-500 text-sm bg-white hover:shadow-inner focus:outline-none focus:ring-2 focus:ring-primary flex space-x-2 items-center justify-center"
           >
             <img
