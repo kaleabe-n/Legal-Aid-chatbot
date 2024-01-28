@@ -26,12 +26,10 @@ const handler = NextAuth({
         if (res.ok && body) {
           return {
             id: "",
-            user: {
-              email: credentials?.username,
-              username: credentials?.username,
-              accessToken: body.access,
-              refreshToken: body.refresh,
-            },
+            email: credentials?.username,
+            username: credentials?.username,
+            accessToken: body.access,
+            refreshToken: body.refresh,
           };
         }
         // Return null if user data could not be retrieved
@@ -40,7 +38,7 @@ const handler = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ account }) {
+    async signIn({ account, user }) {
       if (
         account &&
         account.access_token &&
@@ -65,7 +63,18 @@ const handler = NextAuth({
           return false;
         }
       }
-      return true;
+
+      if (
+        user &&
+        user.accessToken &&
+        account?.provider.toLowerCase() === "credentials"
+      ) {
+        account.access_token = user.accessToken as string; // Store the Django token in the user object
+        account.refresh_token = user.refreshToken as string; // Store the Django token in the user object
+        return true;
+      }
+
+      return false;
     },
     async jwt({ token, account }) {
       // If the account is not null and accessToken is available, add it to the token
