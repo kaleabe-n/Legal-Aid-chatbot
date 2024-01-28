@@ -34,11 +34,23 @@ def feedback_api(request: Request):
             print(user)
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         try:
-            feedbacks: [Feedback] = Feedback.objects.all()
+            params = request.query_params
+            all_feedbacks: [Feedback] = Feedback.objects.all()
+            per_page = int(params.get("per_page", 100000000))
+            page = int(params.get("page", 0))
+            start = page * per_page
+            end = start + per_page
+            feedbacks = all_feedbacks[start:end]
             feedback_serilizer: FeedbackSerilizer = FeedbackSerilizer(
                 feedbacks, many=True
             )
-            return Response(feedback_serilizer.data)
+            return Response(
+                {
+                    "data": feedback_serilizer.data,
+                    "total": all_feedbacks.count(),
+                    "curr_page": page,
+                }
+            )
         except Exception as e:
             print(e)
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -60,7 +72,7 @@ def single_feedback_api(request: Request, pk: str):
             return Response(
                 "feedback with this id not found", status=status.HTTP_404_NOT_FOUND
             )
-        if not user.is_superuser and feedback_giver != user:
+        if feedback_giver != user:
             print(feedback_giver, user)
             return Response(
                 "you are not allowed to edit this feedback",
@@ -103,7 +115,7 @@ def single_feedback_api(request: Request, pk: str):
             return Response(
                 "feedback with this id not found", status=status.HTTP_404_NOT_FOUND
             )
-        if not user.is_superuser and feedback_giver != user:
+        if not user.is_superuser:
             return Response(
                 "you are not allowed to access this feedback",
                 status=status.HTTP_401_UNAUTHORIZED,
@@ -120,9 +132,21 @@ def single_feedback_api(request: Request, pk: str):
 @permission_classes([IsAuthenticated])
 def get_my_feedbacks(request: Request):
     try:
-        feedbacks: [Feedback] = Feedback.objects.filter(posted_by=request.user)
+        params = request.query_params
+        all_feedbacks: [Feedback] = Feedback.objects.filter(posted_by=request.user)
+        per_page = int(params.get("per_page", 100000000))
+        page = int(params.get("page", 0))
+        start = page * per_page
+        end = start + per_page
+        feedbacks = all_feedbacks[start:end]
         feedback_serilizer: FeedbackSerilizer = FeedbackSerilizer(feedbacks, many=True)
-        return Response(feedback_serilizer.data)
+        return Response(
+            {
+                "data": feedback_serilizer.data,
+                "total": all_feedbacks.count(),
+                "curr_page": page,
+            }
+        )
     except Exception as e:
         print(e)
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -136,9 +160,21 @@ def get_feedback_by_user(request: Request, email):
     except Exception as e:
         return Response("user not found", status=status.HTTP_404_NOT_FOUND)
     try:
-        feedbacks: [Feedback] = Feedback.objects.filter(posted_by=user)
+        params = request.query_params
+        all_feedbacks: [Feedback] = Feedback.objects.filter(posted_by=user)
+        per_page = int(params.get("per_page", 100000000))
+        page = int(params.get("page", 0))
+        start = page * per_page
+        end = start + per_page
+        feedbacks = all_feedbacks[start:end]
         feedback_serilizer: FeedbackSerilizer = FeedbackSerilizer(feedbacks, many=True)
-        return Response(feedback_serilizer.data)
+        return Response(
+            {
+                "data": feedback_serilizer.data,
+                "total": all_feedbacks.count(),
+                "curr_page": page,
+            }
+        )
     except Exception as e:
         print(e)
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)

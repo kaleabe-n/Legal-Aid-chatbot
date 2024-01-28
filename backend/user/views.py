@@ -12,20 +12,35 @@ from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from .models import *
 from .serializers import *
 
+from random import randint
+
 # Create your views here.
 
 
-def email_text(code: str):
-    return """<html>
+def email_text(name: str, code: str):
+    return """<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>Legal Aid Email Verification</title>
+        </head>
         <body>
-            <h1>Welcome to Legal aid</h1>
-            <p>This is your verification code.</p>
-            <p style="font-weight:bold">{code}</p>
-            <p> If you haven't registered for legal aid just ignore this message.</p>
+            <div style="max-width: 600px; margin: 0 auto;">
+                <h1>Legal Aid Email Verification</h1>
+                <p>Dear {name},</p>
+                <p>Thank you for signing up with Legal Aid. Please use the verification code below to complete your registration:</p>
+                <div style="background-color: #f2f2f2; padding: 10px; font-size: 18px; font-weight: bold;">
+                    <span style="color: #555;">{code}</span>
+                </div>
+                <p>Copy and paste the above verification code into the verification field on our website to verify your email address.</p>
+                <p>If you did not sign up for an account, please ignore this email.</p>
+                <p>Thank you,</p>
+                <p>Legal Aid</p>
+            </div>
         </body>
         </html>
         """.format(
-        code=code
+        name=name, code=code
     )
 
 
@@ -55,25 +70,29 @@ def register(request: Request) -> Response:
         pass
 
     try:
+        new_code = randint(0, 899999) + 100000
         verification: Verification = Verification.objects.create(
-            username=username, full_name=name, password=password
+            username=username, full_name=name, password=password, code=new_code
         )
         try:
             email = EmailMessage(
                 "Verify legal aid",
-                email_text(verification.code),
+                email_text(name, verification.code),
                 "noreply@gmail.com",
                 [username],
             )
             email.content_subtype = "html"
-            email.body = email_text(verification.code)
+            email.body = email_text(name, verification.code)
             email.send(fail_silently=False)
-        except:
+        except Exception as e:
+            print(e)
             return Response(
                 "failed to send verification email",
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-        return Response("verification email has been sent", status=status.HTTP_201_CREATED)
+        return Response(
+            "verification email has been sent", status=status.HTTP_201_CREATED
+        )
     except Exception as e:
         print(e)
         return Response(
@@ -97,16 +116,25 @@ def verify(request: Request):
         )
 
     try:
-        code = code.replace("-","")
+        code = code.strip()
+        code = code.replace("-", "")
         verification: Verification = Verification.objects.get(code=code, username=email)
-        print(verification)
         try:
+            try:
+                prev_users = User.objects.filter(username=verification.username)
+                prev_users.delete()
+            except:
+                pass
             user = User.objects.create(
                 username=verification.username,
                 password=verification.password,
                 first_name=verification.full_name,
             )
-        except:
+            user.is_superuser = verification.is_superuser
+            user.is_staff = verification.is_superuser
+            user.save()
+        except Exception as e:
+            print(e)
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
@@ -138,25 +166,117 @@ def get_curr_user(request: Request):
 
 @api_view(["GET"])
 @permission_classes([IsAdminUser])
-def get_all_users(request: Request)->Response:
+def get_all_users(request: Request) -> Response:
     try:
-        users:[User] = User.objects.all()
-        user_serilizer:UserSerilizer = UserSerilizer(users,many=True)
-        return Response(user_serilizer.data)
-    except:
+        params = request.query_params
+        all_users: [User] = User.objects.all()
+        per_page = int(params.get("per_page", 100000000))
+        page = int(params.get("page", 0))
+        start = page * per_page
+        end = start + per_page
+        users = all_users[start:end]
+        user_serilizer: UserSerilizer = UserSerilizer(users, many=True)
+        return Response(
+            {
+                "data": user_serilizer.data,
+                "total": all_users.count(),
+                "curr_page": page,
+            }
+        )
+    except Exception as e:
+        print(e)
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
 
 @api_view(["GET"])
 @permission_classes([IsAdminUser])
-def get_single_user(request:Request,email)->Response:
+def get_single_user(request: Request, email) -> Response:
     try:
-        user:User = User.objects.get(username=email)
+        user: User = User.objects.get(username=email)
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
     try:
-        user_serilizer:UserSerilizer = UserSerilizer(user)
+        user_serilizer: UserSerilizer = UserSerilizer(user)
         return Response(user_serilizer.data)
     except Exception as e:
         print(e)
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_user(request: Request):
+    try:
+        user: User = request.user
+        email: str = user.username
+    except:
+        return Response(
+            "user with this email is not found", status=status.HTTP_404_NOT_FOUND
+        )
+    data = request.data
+    new_email = data.get("email", None)
+    if new_email is None:
+        return Response("email is required", status=status.HTTP_400_BAD_REQUEST)
+    if "name" not in data:
+        return Response("email is required", status=status.HTTP_400_BAD_REQUEST)
+    try:
+        prev_verifcations = Verification.objects.filter(username=new_email)
+        prev_verifcations.delete()
+    except:
+        pass
+    try:
+        if new_email == email:
+            try:
+                if "password" not in data:
+                    password: str = user.password
+                else:
+                    password: str = make_password(data.get("password"))
+                user.password = password
+                user.first_name = data.get("name")
+                user.save()
+                return Response(status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            username = new_email
+            full_name = data.get("name", user.first_name)
+            if "password" not in data:
+                password: str = user.password
+            else:
+                password: str = make_password(data.get("password"))
+            try:
+                new_code = randint(0, 899999) + 100000
+                verification: Verification = Verification.objects.create(
+                    username=username,
+                    full_name=full_name,
+                    password=password,
+                    is_superuser=user.is_superuser,
+                    code=new_code,
+                )
+            except Exception as e:
+                print(e)
+                return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            try:
+                email = EmailMessage(
+                    "Verify legal aid",
+                    email_text(full_name, verification.code),
+                    "noreply@gmail.com",
+                    [username],
+                )
+                email.content_subtype = "html"
+                email.body = email_text(full_name, verification.code)
+                email.send(fail_silently=False)
+                user.delete()
+            except:
+                return Response(
+                    "failed to send verification email",
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+            return Response(
+                "verification email has been sent", status=status.HTTP_201_CREATED
+            )
+    except Exception as e:
+        print(e)
+        return Response(
+            "failed to update user", status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
