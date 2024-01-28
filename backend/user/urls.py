@@ -7,5 +7,6 @@ urlpatterns = [
     path('user/curr-user/',get_curr_user),
     path('user/all/',get_all_users),
     path('user/update/',update_user),
-    path('user/single/<str:email>/',get_single_user)
+    path('user/single/<str:email>/',get_single_user),
+    path('user/signin-with-google/',signInWithGoogle)
 ]
