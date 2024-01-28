@@ -7,7 +7,10 @@ from rest_framework.request import Request
 from rest_framework import status
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
-from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from rest_framework_simplejwt.tokens import RefreshToken
+import requests
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import get_user_model
 
 from .models import *
 from .serializers import *
@@ -280,3 +283,27 @@ def update_user(request: Request):
         return Response(
             "failed to update user", status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def signInWithGoogle(request: Request):
+    token = request.data.get('token')
+    google_info = requests.get(f'https://www.googleapis.com/oauth2/v3/tokeninfo?access_token={token}')
+    if google_info.status_code != 200:
+        return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+    google_data = google_info.json()
+
+    # Get or create user from database
+    User = get_user_model()
+    user, created = User.objects.get_or_create(email=google_data['email'], defaults={
+        'username': google_data['email']
+    })
+
+    # Generate JWT token
+    refresh = RefreshToken.for_user(user)
+    jwt_token = {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }
+
+    return Response(jwt_token)
