@@ -66,13 +66,13 @@ const Page: React.FC = () => {
           <h1 className="font-bold text-lg text-white">Legal Aid</h1>
 
           {/* Description section */}
-          <p className="text-white mt-4">
-            Ask about legal system with just clicks
-          </p>
+          <p className="text-white mt-4">ስለ ህግ ጥያቄወችን በቀላሉ ይጠይቁ</p>
         </div>
         <div className="w-full md:w-5/12 bg-white rounded-r-xl flex flex-col py-20 md:px-8">
           {/* Welcome section */}
-          <h1 className="w-full text-center text-xl font-semibold">Welcome</h1>
+          <h1 className="w-full text-center text-xl font-semibold">
+            እንኳን ደህና መጡ
+          </h1>
 
           {/* form section */}
           <form
@@ -84,7 +84,7 @@ const Page: React.FC = () => {
                 <RiMailLine color="#505050" size={16} />
                 <input
                   type="email"
-                  placeholder="Email"
+                  placeholder="ኢሜይል"
                   className="flex-auto h-full focus:outline-none"
                   {...register("username", {
                     required: "Email is Required!!!",
@@ -109,7 +109,7 @@ const Page: React.FC = () => {
                 <CiLock color="#000000" size={18} />
                 <input
                   type="password"
-                  placeholder="Password"
+                  placeholder="የይለፍ ቃል"
                   className="flex-auto h-full focus:outline-none"
                   {...register("password", {
                     required: "Password is required",
@@ -132,20 +132,20 @@ const Page: React.FC = () => {
             {/* Reset Password link */}
             <div className="text-end md:text-center mt-4">
               <Link href="#" className="text-primary text-sm hover:underline">
-                Reset Password?
+                የይለፍ ቃለ ረሱ?
               </Link>
             </div>
             <button
               disabled={!isValid}
               className="mt-8 bg-primary text-white rounded-md py-3 px-4 outline outline-2 outline-primary hover:bg-white hover:text-primary hover:shadow-inner transition ease-in duration-200 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-secondary disabled:text-white"
             >
-              Login
+              ግባ
             </button>
           </form>
 
           <div className="flex items-center mt-4 md:px-5">
             <hr className="w-full border-gray-800" />
-            <p className="mx-4">OR</p>
+            <p className="mx-4">ወይም</p>
             <hr className="w-full border-gray-800" />
           </div>
           <button
@@ -163,17 +163,15 @@ const Page: React.FC = () => {
               alt="google"
               className="w-10 h-10 object-cover"
             />
-            <p>Sign in With Google</p>
+            <p>በጉግለ መለያ ግባ</p>
           </button>
           <div className="mt-4 md:px-8 flex justify-between">
-            <p className="text-sm text-slate-500">
-              Don&apos;t Have an account?
-            </p>
+            <p className="text-sm text-slate-500">መለያ የለወትም?</p>
             <Link
               href="/signup"
               className="text-primary text-sm hover:underline"
             >
-              Sign up
+              ይመዝገቡ
             </Link>
           </div>
         </div>
