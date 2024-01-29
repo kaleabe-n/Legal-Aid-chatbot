@@ -124,7 +124,7 @@ export default function Home() {
               className="lg:block lg:text-sm lg:font-semibold lg:leading-6 lg:text-gray-900"
             >
               <div className="flex">
-                <p>Help</p>
+                <p>እርዳታ</p>
                 <div className="ml-1">
                   <QuestionMarkCircleIcon className="h-6 w-6" />
                 </div>
@@ -135,7 +135,7 @@ export default function Home() {
               className="cursor-pointer lg:block lg:text-sm lg:font-semibold lg:leading-6 lg:text-gray-900"
             >
               <div className="flex">
-                <p>Logout</p>
+                <p>ይውጡ</p>
                 <div className="ml-1">
                   <FiLogOut className="h-6 w-6" />
                 </div>
