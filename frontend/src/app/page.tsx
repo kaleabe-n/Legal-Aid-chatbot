@@ -16,8 +16,7 @@ import Image from "next/image";
 import { FiLogOut } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-
-const messages = [];
+import { useGetConversationsQuery } from "@/store/chat/chatApi";
 
 const infos = [
   {
@@ -40,6 +39,7 @@ const infos = [
 export default function Home() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [messages, setMessages] = useState<string[]>([]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -73,6 +73,20 @@ export default function Home() {
       )}px`;
 
       textareaRef.current.style.height = height;
+    }
+  };
+
+  const handleKeyDown = (event: any) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const handleSendMessage = () => {
+    if (inputValue) {
+      setMessages([...messages, inputValue, "ድህረ ገጹ ገና መመገንባት ላይ ነው"]);
+      setInputValue("");
     }
   };
 
@@ -246,27 +260,32 @@ export default function Home() {
           {messages.length !== 0 && (
             <div className="w-full px-5 flex flex-col justify-between">
               <div className="flex flex-col mt-5">
-                <div className="flex justify-end mb-4">
-                  <div className="mr-2 py-3 px-4 bg-blue-200 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl text-blue-900">
-                    Welcome to group everyone !
-                  </div>
-                  <img
-                    src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
-                    className="object-cover h-8 w-8 rounded-full"
-                    alt=""
-                  />
-                </div>
-                <div className="flex justify-start mb-4">
-                  <Image
-                    src="legal-aid-logo-black.svg"
-                    alt=""
-                    width={70}
-                    height={70}
-                  />
-                  <div className="ml-2 py-3 px-4 bg-gray-100 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-gray-700">
-                    happy holiday guys!
-                  </div>
-                </div>
+                {messages.map((message, idx) =>
+                  idx % 2 === 0 ? (
+                    <div className="flex justify-end mb-4">
+                      <div className="mr-2 py-3 px-4 bg-blue-200 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl text-blue-900">
+                        {message}
+                      </div>
+                      <img
+                        src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
+                        className="object-cover h-8 w-8 rounded-full"
+                        alt=""
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex justify-start mb-4">
+                      <Image
+                        src="legal-aid-logo-black.svg"
+                        alt=""
+                        width={70}
+                        height={70}
+                      />
+                      <div className="ml-2 py-3 px-4 bg-gray-100 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-gray-700">
+                        {message}
+                      </div>
+                    </div>
+                  )
+                )}
               </div>
             </div>
           )}
@@ -278,9 +297,14 @@ export default function Home() {
             placeholder="ምን ልርዳዎት?"
             value={inputValue}
             onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
             style={{ overflow: "hidden", resize: "none" }}
           />
-          <button type="submit" className="self-end mt-2 ml-2">
+          <button
+            type="button"
+            onClick={handleSendMessage}
+            className="self-end mt-2 ml-2"
+          >
             <PaperAirplaneIcon
               className="w-8 text-primary"
               aria-hidden="true"

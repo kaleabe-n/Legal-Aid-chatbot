@@ -35,7 +35,6 @@ const Page: React.FC = () => {
     setLoading(true);
     console.log(data);
     const response: any = await login(data);
-    console.log(response, isError, isSuccess, error, status);
 
     if (response?.data?.access) {
       signIn("credentials", data);
@@ -151,7 +150,12 @@ const Page: React.FC = () => {
           </div>
           <button
             type="button"
-            onClick={() => signIn("google")}
+            disabled={isLoading}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              signIn("google");
+            }}
             className="mt-4 md:mx-8 rounded-md py-1 px-4 outline outline-1 outline-slate-500 text-sm bg-white hover:shadow-inner focus:outline-none focus:ring-2 focus:ring-primary flex space-x-2 items-center justify-center"
           >
             <img
@@ -165,7 +169,10 @@ const Page: React.FC = () => {
             <p className="text-sm text-slate-500">
               Don&apos;t Have an account?
             </p>
-            <Link href="#" className="text-primary text-sm hover:underline">
+            <Link
+              href="/signup"
+              className="text-primary text-sm hover:underline"
+            >
               Sign up
             </Link>
           </div>
