@@ -47,7 +47,7 @@ def email_text(name: str, code: str):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def register(request: Request) -> Response:
-    data = request.POST
+    data = request.data
     username: str = data.get("email", None)
     if username is None:
         return Response("email is required field", status=status.HTTP_400_BAD_REQUEST)
@@ -103,7 +103,7 @@ def register(request: Request) -> Response:
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def verify(request: Request):
-    data = request.POST
+    data = request.data
     email: str = data.get("email", None)
     if not email:
         return Response(
@@ -130,6 +130,7 @@ def verify(request: Request):
                 password=verification.password,
                 first_name=verification.full_name,
             )
+            print("User created", user.password, verification.password)
             user.is_superuser = verification.is_superuser
             user.is_staff = verification.is_superuser
             user.save()
